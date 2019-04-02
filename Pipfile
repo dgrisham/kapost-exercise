@@ -13,3 +13,4 @@ python_version = "3.7"
 
 [scripts]
 main = './src/kapost_exercise/app.py'
+shell = 'ipython3 -i src/kapost_exercise/app.py --'
