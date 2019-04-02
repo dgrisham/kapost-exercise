@@ -16,9 +16,11 @@ def main(argv):
     args = cli(argv)
     src = args.src
     dst = args.dst
+    threshold = args.size
 
     s3 = boto3.resource("s3")
 
+    # check that src and dst buckets exist/are accessible
     try:
         s3.meta.client.head_bucket(Bucket=src)
     except ClientError as e:
@@ -32,8 +34,11 @@ def main(argv):
 
     bsrc = s3.Bucket(src)
     bdst = s3.Bucket(dst)
-
-    return s3, bsrc, bdst
+    # copy all objects above threshold size from src to dst
+    for obj in bsrc.objects.all():
+        if (obj.size / (2 ** 20)) > threshold:
+            print(f"copying {obj.key} to {dst}")
+            bdst.copy({"Bucket": obj.bucket_name, "Key": obj.key}, obj.key)
 
 
 def cli(argv):
@@ -63,4 +68,4 @@ def cli(argv):
 
 
 if __name__ == "__main__":
-    s3, bsrc, bdst = main(sys.argv[1:])
+    main(sys.argv[1:])
